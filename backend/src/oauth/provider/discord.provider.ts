@@ -95,7 +95,7 @@ export class DiscordProvider implements OAuthProvider<DiscordToken> {
     };
   }
 
-  async checkLimitedGuild(token: OAuthToken<DiscordToken>, guildId: string) {
+  async checkLimitedGuild(token: OAuthToken<DiscordToken>, guildIds: string) {
     try {
       const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
         method: "get",
@@ -105,7 +105,8 @@ export class DiscordProvider implements OAuthProvider<DiscordToken> {
         },
       });
       const guilds = (await res.json()) as DiscordPartialGuild[];
-      if (!guilds.some((guild) => guild.id === guildId)) {
+      const allowedGuildIds = guildIds.split(",").map(id => id.trim());
+      if (!guilds.some((guild) => allowedGuildIds.includes(guild.id))) {
         throw new ErrorPageException("user_not_allowed");
       }
     } catch {
